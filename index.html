@@ -61,12 +61,13 @@ button.y{background:#D33A2C;color:#fff;border:0}
 </div>
 </div>
 <div class="r"><span class="l">Стиль</span><select id="eqs"><option value="bars">Смуги</option><option value="wave">Хвиля</option><option value="ring">Коло з променями</option></select></div>
-<div class="r"><span class="l">Підпис</span><input type="text" id="eqc" placeholder="Вгадай мелодію"></div>
+<div class="r"><span class="l">Номер треку</span><input type="text" id="eqt" placeholder="Трек №1"></div>
+<div class="r"><span class="l">Підпис знизу</span><input type="text" id="eqc" placeholder="Вгадай мелодію"></div>
 <div class="r"><span class="l">Тривалість</span><input type="range" id="eqd" min="3" max="15" step="1" value="10"><span class="v" id="eqdo">10 с</span></div>
 <div class="r" id="rTempo"><span class="l">Темп</span><input type="range" id="eqb" min="60" max="180" step="2" value="120"><span class="v" id="eqbo">120</span></div>
 <div class="r"><span class="l">Сила</span><input type="range" id="eqa" min="40" max="160" step="5" value="100"><span class="v" id="eqao">100%</span></div>
 <div class="r"><span class="l">Кількість смуг</span><input type="range" id="eqn" min="11" max="61" step="2" value="25"><span class="v" id="eqno">25</span></div>
-<div class="ck"><label><input type="checkbox" id="eqcaps"> Підпис великими літерами</label></div>
+<div class="ck"><label><input type="checkbox" id="eqcaps"> Написи великими літерами</label></div>
 </div>
 
 <div id="gAl" class="grp hide">
@@ -116,7 +117,7 @@ let FONT='Amatic SC',mode='cd',BS=0;
 const FWm={'Amatic SC':700,'Caveat':600,'Neucha':400,'Pangolin':400,'Bad Script':400,'UserFont':400};
 const F=s=>`${FWm[FONT]||400} ${s}px "${FONT}", sans-serif`;
 
-const BGS={board:'#151515',graphite:'#222221',green:'#18211c',brown:'#211b17'};
+const BGS={board:'#161616',graphite:'#222221',green:'#18211c',brown:'#211b17'};
 const tex=mk(W+40,H+40),tx=tex.getContext('2d');
 const eio=p=>p<0.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2,eo=p=>1-Math.pow(1-p,3),cl=p=>Math.max(0,Math.min(1,p));
 
@@ -131,17 +132,26 @@ function circPts(cx,cy,r,seed){const rr=R(seed),ph=rr()*6,pts=[];for(let i=0;i<=
 function rectPts(x0,y0,w,h){return [[x0+w/2,y0],[x0+w,y0],[x0+w,y0+h],[x0,y0+h],[x0,y0],[x0+w/2+10,y0+4]]}
 function brk(g,cx,cy,w,h,p,seed){const a=Math.min(44,w*0.09);chalk(g,[[cx-w/2+a,cy-h/2],[cx-w/2,cy-h/2],[cx-w/2,cy+h/2],[cx-w/2+a,cy+h/2]],p,8,CH,seed,3);chalk(g,[[cx+w/2-a,cy-h/2],[cx+w/2,cy-h/2],[cx+w/2,cy+h/2],[cx+w/2-a,cy+h/2]],p,8,CH,seed+50,3)}
 
-function makeTex(){const base=BGS[$('bg').value]||BGS.board,r0=R(42);tx.globalAlpha=1;tx.globalCompositeOperation='source-over';tx.fillStyle=base;tx.fillRect(0,0,W+40,H+40);
-tx.lineCap='round';for(let i=0;i<60;i++){tx.strokeStyle=`rgba(255,255,255,${0.012+r0()*0.03})`;tx.lineWidth=30+r0()*110;const px=r0()*W,py=r0()*H;tx.beginPath();tx.moveTo(px,py);tx.quadraticCurveTo(px+(r0()-0.5)*500,py+(r0()-0.5)*300,px+(r0()-0.5)*700,py+(r0()-0.5)*400);tx.stroke()}
-for(let i=0;i<9000;i++){tx.fillStyle=`rgba(255,255,255,${r0()*0.08})`;const s=1+r0()*1.6;tx.fillRect(r0()*W,r0()*H,s,s)}
+function makeTex(){const base=BGS[$('bg').value]||BGS.board,r0=R(42),TW=W+40,TH=H+40;
+tx.globalAlpha=1;tx.globalCompositeOperation='source-over';tx.fillStyle=base;tx.fillRect(0,0,TW,TH);
+for(let i=0;i<10;i++){const px=r0()*TW,py=r0()*TH,rr=200+r0()*500,g=tx.createRadialGradient(px,py,0,px,py,rr);g.addColorStop(0,`rgba(255,255,255,${0.012+r0()*0.018})`);g.addColorStop(1,'rgba(255,255,255,0)');tx.fillStyle=g;tx.fillRect(px-rr,py-rr,rr*2,rr*2)}
+for(let i=0;i<16000;i++){tx.fillStyle=r0()<0.55?`rgba(255,255,255,${r0()*0.045})`:`rgba(0,0,0,${r0()*0.22})`;const s=0.7+r0()*1.3;tx.fillRect(r0()*TW,r0()*TH,s,s)}
+tx.lineCap='round';
+for(let s=0;s<14;s++){const cx0=r0()*TW,cy0=r0()*TH,len=300+r0()*650,ang=(r0()-0.5)*0.5+(r0()<0.3?Math.PI/2:0),band=50+r0()*120,nl=22+Math.floor(r0()*30),a0=0.01+r0()*0.022;
+tx.save();tx.translate(cx0,cy0);tx.rotate(ang);for(let l=0;l<nl;l++){const off=(l/nl-0.5)*band+(r0()-0.5)*4,stx=(r0()-0.5)*90;tx.strokeStyle=`rgba(255,255,255,${a0*(0.4+r0())})`;tx.lineWidth=0.5+r0()*1.2;
+tx.beginPath();tx.moveTo(-len/2+stx,off);tx.quadraticCurveTo(0,off+(r0()-0.5)*18,len/2+stx,off+(r0()-0.5)*10);tx.stroke()}tx.restore()}
+for(let i=0;i<1900;i++){const px=r0()*TW,py=r0()*TH,a=r0()*Math.PI,l=6+r0()*80,lt=r0()<0.78;tx.strokeStyle=lt?`rgba(255,255,255,${0.02+r0()*0.075})`:`rgba(0,0,0,${0.12+r0()*0.2})`;tx.lineWidth=0.45+r0()*0.8;
+tx.beginPath();tx.moveTo(px,py);tx.quadraticCurveTo(px+Math.cos(a)*l/2+(r0()-0.5)*6,py+Math.sin(a)*l/2+(r0()-0.5)*6,px+Math.cos(a)*l,py+Math.sin(a)*l);tx.stroke()}
+for(let i=0;i<70;i++){const px=r0()*TW,py=r0()*TH,a=r0()*Math.PI,l=180+r0()*480;tx.strokeStyle=`rgba(255,255,255,${0.03+r0()*0.06})`;tx.lineWidth=0.5+r0()*0.8;
+tx.beginPath();tx.moveTo(px,py);tx.quadraticCurveTo(px+Math.cos(a)*l/2+(r0()-0.5)*30,py+Math.sin(a)*l/2+(r0()-0.5)*30,px+Math.cos(a)*l,py+Math.sin(a)*l);tx.stroke()}
 const dens=+$('deco').value/100,rr=R(7),avoid=(px,py)=>px>W*0.14&&px<W*0.86&&py>H*0.2&&py<H*0.8;
 const nT=Math.round(dens*36);for(let i=0;i<nT;i++){let px,py,tr=0;do{px=40+rr()*(W-120);py=40+rr()*(H-200);tr++}while(avoid(px,py)&&tr<40);if(avoid(px,py))continue;
 const n=2+Math.floor(rr()*4),h=45+rr()*35,s=h*0.3,rot=(rr()-0.5)*0.5,cross=n>=4&&rr()<0.7;tx.save();tx.translate(px,py);tx.rotate(rot);tx.globalAlpha=0.35+rr()*0.25;
 for(let j=0;j<n;j++)chalk(tx,[[j*s+(rr()-0.5)*4,-h/2],[j*s,h/2]],1,3.5,CH,i*31+j,2);if(cross)chalk(tx,[[-12,h/2-8],[(n-1)*s+12,-h/2+8]],1,3.5,CH,i*31+99,2);tx.restore()}
-const ph=$('phr').value.split('\n').map(s=>s.trim()).filter(Boolean);if(dens>0)ph.forEach((t,pi)=>{const reps=dens>0.5?2:1;for(let r=0;r<reps;r++){let px,py,tr=0;const fs=42+rr()*22;tx.font=`600 ${fs}px "Caveat", sans-serif`;const w=tx.measureText(t).width;
+const ph=$('phr').value.split('\n').map(s=>s.trim()).filter(Boolean);if(dens>0)ph.forEach(t=>{const reps=dens>0.5?2:1;for(let r=0;r<reps;r++){let px,py,tr=0;const fs=42+rr()*22;tx.font=`600 ${fs}px "Caveat", sans-serif`;const w=tx.measureText(t).width;
 do{px=30+rr()*Math.max(10,W-60-w);py=60+rr()*(H-160);tr++}while((avoid(px,py)||avoid(px+w,py))&&tr<60);if(avoid(px,py)||avoid(px+w,py))continue;
 tx.save();tx.translate(px,py);tx.rotate((rr()-0.5)*0.5);tx.globalAlpha=0.4+rr()*0.2;tx.fillStyle=CH;tx.textBaseline='middle';tx.fillText(t,0,0);tx.restore()}});
-tx.globalAlpha=1;const vg=tx.createRadialGradient(W/2+20,H/2+20,H*0.2,W/2+20,H/2+20,H*0.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.55)');tx.fillStyle=vg;tx.fillRect(0,0,W+40,H+40)}
+tx.globalAlpha=1;const vg=tx.createRadialGradient(W/2+20,H/2+20,H*0.2,W/2+20,H/2+20,H*0.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.55)');tx.fillStyle=vg;tx.fillRect(0,0,TW,TH)}
 
 const masks=[0,1].map(n=>{const m=mk(W,H),g=m.getContext('2d'),r=R(500+n);for(let i=0;i<70000;i++){g.fillStyle=`rgba(0,0,0,${0.25+r()*0.75})`;const s=1+r()*2.6;g.fillRect(r()*W,r()*H,s,s)}
 g.lineCap='round';for(let i=0;i<5000;i++){g.strokeStyle=`rgba(0,0,0,${0.3+r()*0.5})`;g.lineWidth=1+r()*1.5;const px=r()*W,py=r()*H,a=-0.9+r()*0.4,l=6+r()*16;g.beginPath();g.moveTo(px,py);g.lineTo(px+Math.cos(a)*l,py+Math.sin(a)*l);g.stroke()}return m});
@@ -153,9 +163,9 @@ const nd=Math.floor(rf()*5*k);for(let j=0;j<nd;j++){mx.fillStyle=rf()<0.5?'rgba(
 const f=(rf()-0.5)*0.1*k;mx.fillStyle=f>0?`rgba(255,250,235,${f})`:`rgba(0,0,0,${-f*1.3})`;mx.fillRect(0,0,W,H)}
 
 const nEl=$('n'),z0=$('z0'),lwEl=$('lw'),cds=$('cds'),topEl=$('top'),mainEl=$('main'),durEl=$('dur'),capsEl=$('caps'),timEl=$('tim'),kEl=$('k'),ff=$('ff'),brEl=$('br');
-const eqs=$('eqs'),eqc=$('eqc'),eqd=$('eqd'),eqb=$('eqb'),eqa=$('eqa'),eqn=$('eqn'),eqcaps=$('eqcaps'),eqo=$('eqo'),eqau=$('eqau'),st=$('st');
+const eqs=$('eqs'),eqt=$('eqt'),eqc=$('eqc'),eqd=$('eqd'),eqb=$('eqb'),eqa=$('eqa'),eqn=$('eqn'),eqcaps=$('eqcaps'),eqo=$('eqo'),eqau=$('eqau'),st=$('st');
 const alfx=$('alfx'),altop=$('altop'),altitle=$('altitle'),alsub=$('alsub'),alfr=$('alfr'),alrv=$('alrv'),ald=$('ald'),alkb=$('alkb'),alcaps=$('alcaps'),altim=$('altim');
-const SAVE_IDS=['cds','n','z0','lw','top','main','dur','caps','tim','eqs','eqc','eqd','eqb','eqa','eqn','eqcaps','eqau','alfx','altop','altitle','alsub','alfr','alrv','ald','alkb','alcaps','altim','bg','acc','deco','phr','br','k','ff'];
+const SAVE_IDS=['cds','n','z0','lw','top','main','dur','caps','tim','eqs','eqt','eqc','eqd','eqb','eqa','eqn','eqcaps','eqau','alfx','altop','altitle','alsub','alfr','alrv','ald','alkb','alcaps','altim','bg','acc','deco','phr','br','k','ff'];
 const KEY='romantyka_gen_v1';
 function saveSettings(){try{const o={mode};SAVE_IDS.forEach(id=>{const e=$(id);if(id==='ff'&&e.value==='UserFont')return;o[id]=e.type==='checkbox'?e.checked:e.value});localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
 function loadSettings(){try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(!o)return;SAVE_IDS.forEach(id=>{if(!(id in o))return;const e=$(id);if(e.type==='checkbox')e.checked=o[id];else e.value=o[id]});if(o.ff)FONT=o.ff;if(o.mode)mode=o.mode}catch(e){}}
@@ -249,21 +259,24 @@ const ii=Math.round(u*60),hz=hs(ii,q0)*(1-sm)+hs(ii,q1)*sm;
 const lo=kk*Math.pow(1-u,1.4),mid=(0.5+0.5*Math.sin(TP*0.7*t+u*9))*(0.5+0.5*Math.sin(TP*0.3*t+u*4.3));
 return Math.min(1,env*(0.07+0.58*lo+0.28*mid+0.22*hz*(0.4+0.6*u)))}
 function eqBars(t,amp){const N=+eqn.value,cy=H/2-40,spc=W*0.82/N,bw=Math.max(6,spc*0.45),MX=440;
-for(let i=0;i<N;i++){const u=Math.abs(i-(N-1)/2)/((N-1)/2),h=Math.min(720,band(u,t)*MX*amp)+bw/2,px=W/2-W*0.41+spc*(i+0.5);
+for(let i=0;i<N;i++){const u=Math.abs(i-(N-1)/2)/((N-1)/2),h=Math.min(540,band(u,t)*MX*amp)+bw/2,px=W/2-W*0.41+spc*(i+0.5);
 chalk(x,[[px,cy-h],[px,cy+h]],1,bw,u<0.3?ACC:CH,600+i*7+BS,3)}}
 function eqWave(t,amp){const cy=H/2-40,kk=kick(t),A=useA(),Ls=[[CH,9,1,0],[ACC,6,0.65,1.7],['rgba(236,234,228,0.5)',4,0.4,3.1]];
 Ls.forEach(([col,lw,am,ph],li)=>{const pts=[];for(let px=60;px<=W-60;px+=10){const u=(px-60)/(W-120),win=Math.pow(Math.sin(Math.PI*u),1.6);let y;
 if(A){const len=timeD.length,idx=(Math.floor(u*len*0.5)+li*97)%len;y=(timeD[idx]-128)/128*520}
 else y=Math.sin(TP*(3*u)+TP*0.5*t+ph)*(0.4+0.6*kk)*170+Math.sin(TP*(7*u)-TP*0.9*t+ph)*band(Math.abs(u-0.5)*2,t)*150+Math.sin(TP*(17*u)+TP*1.3*t)*45*(0.3+kk);
-pts.push([px,cy+y*win*am*amp])}chalk(x,pts,1,lw,col,700+li*50+BS,2)});
+pts.push([px,cy+Math.max(-500,Math.min(500,y*win*am*amp))])}chalk(x,pts,1,lw,col,700+li*50+BS,2)});
 chalk(x,[[60,cy],[W-60,cy]],1,2,'rgba(236,234,228,0.2)',780+BS,2)}
 function eqRing(t,amp){const cx=W/2,cy=H/2-40,kk=Math.min(1.2,kick(t)),Rr=250+14*kk,N=(+eqn.value)*2+10;
 chalk(x,circPts(cx,cy,Rr,31),1,7,CH,1000+BS,4);
-for(let i=0;i<N;i++){const a=-Math.PI/2+TP*i/N,u=Math.abs(((i/N)*2)%2-1),h=16+Math.min(300,band(u,t)*230*amp);
+for(let i=0;i<N;i++){const a=-Math.PI/2+TP*i/N,u=Math.abs(((i/N)*2)%2-1),h=16+Math.min(250,band(u,t)*230*amp);
 chalk(x,[[cx+Math.cos(a)*(Rr+20),cy+Math.sin(a)*(Rr+20)],[cx+Math.cos(a)*(Rr+20+h),cy+Math.sin(a)*(Rr+20+h)]],1,Math.max(5,Math.min(13,700/N)),u>0.65?ACC:CH,1100+i*3+BS,2)}
 chalk(x,circPts(cx,cy,70+50*Math.min(1,kk),5),1,7,ACC,1200+BS,4)}
 function drawEq(t){if(useA()){analyser.getByteFrequencyData(freqD);analyser.getByteTimeDomainData(timeD)}
 const amp=(+eqa.value)/100,s=eqs.value;if(s==='bars')eqBars(t,amp);else if(s==='wave')eqWave(t,amp);else eqRing(t,amp);
+let tn=eqt.value.trim();if(eqcaps.checked)tn=tn.toUpperCase();
+if(tn){const p=eo(cl((t-0.1)/0.6));x.save();x.globalAlpha=p;x.fillStyle=CH;x.textAlign='center';x.textBaseline='middle';let fs=130;x.font=F(fs);let w=x.measureText(tn).width;if(w>W*0.8){fs=fs*W*0.8/w;x.font=F(fs);w=W*0.8}
+const yT=250;x.fillText(tn,W/2,yT+14*(1-p));x.restore();chalk(x,[[W/2-w/2-14,yT+fs*0.5+8],[W/2+w/2+14,yT+fs*0.5-2]],eo(cl((t-0.4)/0.6)),8,ACC,1650+BS,4)}
 let tt=eqc.value.trim();if(eqcaps.checked)tt=tt.toUpperCase();
 if(tt){x.save();x.fillStyle=CH;x.textAlign='center';x.textBaseline='middle';let fs=140;x.font=F(fs);let w=x.measureText(tt).width;const lim=W*(brEl.checked?0.74:0.86);if(w>lim){fs=fs*lim/w;x.font=F(fs);w=lim}
 const yC=H/2-40+(s==='ring'?560:600);x.fillText(tt,W/2,yC);x.restore();if(brEl.checked)brk(x,W/2,yC,w+110,fs+40,1,1700+BS)}}
@@ -328,7 +341,7 @@ lastBlob=new Blob(ch,{type:mime||'video/mp4'});lastUrl=URL.createObjectURL(lastB
 const slugOf=s=>(s.trim().split(/\s+/).slice(0,3).join('_')||'tekst').replace(/[^\p{L}\p{N}_]/gu,'');
 if(mode==='cd')lastName='romantyka_vidlik_'+nEl.value+'-'+(z0.checked?0:1)+'_9x16.'+ext;
 else if(mode==='tx')lastName='romantyka_'+slugOf(mainEl.value)+'_'+D+'s_9x16.'+ext;
-else if(mode==='eq')lastName='romantyka_ekvalaizer_'+eqs.value+(addSound?'_zvuk':'')+'_'+D+'s_9x16.'+ext;
+else if(mode==='eq')lastName='romantyka_'+(eqt.value.trim()?slugOf(eqt.value)+'_':'')+'ekvalaizer_'+eqs.value+(addSound?'_zvuk':'')+'_'+D+'s_9x16.'+ext;
 else lastName='romantyka_albom_'+slugOf(altitle.value)+'_'+D+'s_9x16.'+ext;
 v.src=lastUrl;v.classList.remove('hide');dlb.classList.remove('hide');
 const f=new File([lastBlob],lastName,{type:lastBlob.type});if(navigator.canShare&&navigator.canShare({files:[f]}))shb.classList.remove('hide');
